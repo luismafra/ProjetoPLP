@@ -4,20 +4,20 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-typedef struct{
+struct BOT{
 	char* lugares[9];
 	char* armas[9];
 	char* pessoas[9];
 	char* prioridade[3];
 	int cont;
 	int index[3];
-  }BOT;
-typedef struct {
+  };
+struct DADOS{
 	char* lugares[9];
 	char* armas[9];
 	char* pessoas[9];  
-  }DADOS;
-void defineIndices(BOT bot1, BOT bot2){
+  };
+void defineIndices(struct BOT bot1,struct BOT bot2){
 	bot1.index[0] = 9;
 	bot1.index[1] = 9;
 	bot1.index[2] = 9;
@@ -86,7 +86,7 @@ int verifica(char* algo, char* array[]){
 	}
 	return 0;
 }
-void retiraLugar(BOT bot, char* algo){
+void retiraLugar(struct BOT bot, char* algo){
 	int i;
 	for(i = 0; i < bot.index[0]; i++){
 		if(bot.lugares[i] == algo){
@@ -97,7 +97,7 @@ void retiraLugar(BOT bot, char* algo){
 	bot.index[0]--;
 }
 
-void sortea(BOT bot1, BOT bot2, DADOS usuario, DADOS base, char* tudo[]){
+void sortea(struct BOT bot1,struct BOT bot2,struct DADOS usuario,struct DADOS base, char* tudo[]){
 	time_t t;
 	srand((unsigned) time(&t));
 	int i = 24;
@@ -105,7 +105,7 @@ void sortea(BOT bot1, BOT bot2, DADOS usuario, DADOS base, char* tudo[]){
 		for(int j = 0; j < 8; j++){
 			char* algo = tudo[rand()%i];
 			if(verifica(algo,base.lugares) == 1){
-				retiraLugar(bot1.lugares,algo);
+				retiraLugar(bot1,algo);
 			}
 		}
 	}
@@ -120,10 +120,10 @@ int main(void) {
   //for(int i = 0; i < 5; i++){
 	//printf("%d \n", rand()%1);
   //} 
-  DADOS base;
-  BOT bot1;
-  BOT bot2;
-  DADOS usuario;
+  struct DADOS base;
+  struct BOT bot1;
+  struct BOT bot2;
+  struct DADOS usuario;
   defineIndices(bot1,bot2);
   criaLugares(base.lugares,bot1.lugares,bot2.lugares,usuario.lugares);
   criaArmas(base.armas,bot1.armas,bot2.armas,usuario.armas);
