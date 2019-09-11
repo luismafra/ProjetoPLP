@@ -138,7 +138,7 @@ void retiraTudo(char* tudo[], char* algo, int index){
 	}
 	tudo[i] = tudo[index - 1];
 }
-void sortea(JOGADOR *bot1,JOGADOR *bot2,JOGADOR *usuario,DADOS base, char* tudo[]){
+void sorteia(JOGADOR *bot1,JOGADOR *bot2,JOGADOR *usuario,DADOS base, char* tudo[]){
 	time_t t;
 	srand((unsigned) time(&t));
 	int i = 24;
@@ -204,7 +204,8 @@ void mostraMenu(){
 	printf("1 - Perguntar ao bot1\n");
   	printf("2 - Perguntar ao bot2\n");
   	printf("3 - Dar um palpite\n");
-  	printf("4 - Sair\n");
+    printf("4 - Para olhar suas cartas\n");
+  	printf("5 - Sair\n");
   	printf("Opcao> ");
 }
 void mostraPossiveis(JOGADOR usuario, DADOS base){
@@ -224,6 +225,10 @@ void mostraPossiveis(JOGADOR usuario, DADOS base){
 		if (i != usuario.index[2] - 1) printf("%s, ", usuario.pessoas[i]);
 		else printf("%s.\n\n", usuario.pessoas[i]);		
 	}
+}
+//TODO
+char* mostrarCartasJogador(){
+    printf("Mostrando suas cartas ...");
 }
 void criaBaralho(DADOS base, RESPOSTA resposta, char* tudo[]){
 	int i = 0;
@@ -283,40 +288,78 @@ int main(void) {
   for(int j = 0; j < bot1.index[0]; j++){
 	printf("%s\n",bot1.lugares[j]);
   } */
-  sortea(&bot1,&bot2,&usuario,base,tudo);
+  sorteia(&bot1,&bot2,&usuario,base,tudo);
   int opcao;
+  int rodada = 1;
+
+
+
   do{
+      char* palpiteLugar;
+      char* palpiteArma;
+      char* palpitePessoa;
+      printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+      printf("Rodada numero %d.\n", rodada);
+      printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
 	  mostraPossiveis(usuario, base);
 	  mostraMenu();
-	  scanf("%d", &opcao);
+	  scanf("%d\n", &opcao);
 	  switch(opcao){
 		  case 1:{
+              printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+              printf("Pergunte ao Bot1 se ele tem um lugar, uma arma ou uma pessoa");
+			  printf("Digite a lugar: ");
+			  fgets("%s", &palpitelugar);
+			  printf("Digite a arma: ");
+              fgets("%s", &palpiteArma);
 			  printf("Digite a pessoa: ");
-			  printf("Digite a pessoa: ");
-			  printf("Digite a pessoa: ");
+              fgets("%s", &palpitePessoa);
 		  }
 		  case 2:{
-
+              printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+              printf("Pergunte ao Bot2 se ele tem um lugar, uma arma ou uma pessoa");
+              printf("Digite a lugar: ");
+              fgets("%s", &palpitelugar);
+              printf("Digite a arma: ");
+              fgets("%s", &palpiteArma);
+              printf("Digite a pessoa: ");
+              fgets("%s", &palpitePessoa);
 		  }
 		  case 3:{
+              printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+              printf("De um palpite contendo um lugar, uma arma e uma pessoa");
+              printf("Digite a lugar: ");
+              fgets("%s", &palpitelugar);
+              printf("Digite a arma: ");
+              fgets("%s", &palpiteArma);
+              printf("Digite a pessoa: ");
+              fgets("%s", &palpitePessoa);
 
 		  }
 		  case 4:{
-			break;
+		      //TODO
+		      mostrarCartasJogador();
+
 		  }
+          case 5:{
+              break;
+          }
 		  default:{
+              printf("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
 			  printf("\nOPCAO INVALIDA! TENTE NOVAMENTE\n");
-			  printf("--------------------------------\n\n");
 		  }
+
+		  rodada++ ;
 	  }
 
-  } while(opcao != 4);
+  } while(opcao != 5);
   
   //Escolha uma opção
   //1 - Perguntar ao bot1
   //2 - Perguntar ao bot2
   //3 - Dar um palpite
-  //4 - Sair
+  //4 - Olhar suas cartas
+  //5 - Sair
   //Opção> 1
   //Digite a pessoa:
   //Digite a arma:
