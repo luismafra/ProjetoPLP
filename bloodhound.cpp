@@ -341,14 +341,17 @@ string verificaCartas(JOGADOR *bot, string lugar, string arma, string pessoa, JO
   else {
     mudado = cartasDoJogador[rand() % index];
     if(mudado == 0){
+      retorno = "O jogador tinha " + lugar;
       jogador->prioridades[0] = "";
       retiraLugar(jogador, lugar);
 	}
   	else if(mudado == 1){
+      retorno = "O jogador tinha " + arma;
       jogador->prioridades[1] = "";
       retiraArma(jogador, arma);
     }
     else if(mudado == 2){
+      retorno = "O jogador tinha " + pessoa;
       jogador->prioridades[2] = "";
       retiraPessoa(jogador, pessoa);
     }
