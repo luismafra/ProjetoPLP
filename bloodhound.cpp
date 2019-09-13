@@ -21,7 +21,7 @@ typedef struct{
 	string cartas[8];
 	int cont;
 	int index[3];
- } JOGADOR;
+} JOGADOR;
 
 typedef struct{
 	string lugares[9];
@@ -42,6 +42,8 @@ void flush() {
     int ch;
     while ( ( ch = fgetc ( stdin ) ) != EOF && ch != '\n' ) {}
 }
+
+void mostraPossiveis(JOGADOR usuario);
 
 void definePrioridades(JOGADOR *bot1, JOGADOR *bot2){
     bot1->prioridades[0] = "";
@@ -64,6 +66,7 @@ void defineIndices(JOGADOR *bot1, JOGADOR *bot2, JOGADOR *usuario){
 	usuario->index[2] = 9;
 }
 
+// Define os nomes dos possíveis locais no jogo
 void criaLugares(string lugares[], string bot1lugares[], string bot2lugares[], string usuariolugares[]){
 	lugares[0] = "Lavanderia";
 	lugares[1] = "Banco";
@@ -82,6 +85,7 @@ void criaLugares(string lugares[], string bot1lugares[], string bot2lugares[], s
 	}
 }
 
+// Define os nomes das possíveis armas no jogo
 void criaArmas(string armas[],	string bot1armas[], string bot2armas[], string usuarioarmas[]){
 	armas[0] = "Machado";
 	armas[1] = "Pa";
@@ -100,6 +104,7 @@ void criaArmas(string armas[],	string bot1armas[], string bot2armas[], string us
 	}
 }
 
+// Define os nomes dos possíveis supeitos no jogo
 void criaSuspeitos(string pessoas[], string bot1pessoas[], string bot2pessoas[], string usuariopessoas[]){
 	pessoas[0] = "Johann";
 	pessoas[1] = "Matias";
@@ -118,29 +123,24 @@ void criaSuspeitos(string pessoas[], string bot1pessoas[], string bot2pessoas[],
 	}
 }
 
-int verifica(string algo, string array[]){
+bool verifica(string algo, string array[]){
 	for(int i = 0; i < 9; i++){
 		if(array[i] == algo)
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
-int verificaResposta(RESPOSTA resposta, string lugar, string arma, string pessoa){
-  int acertou = 0;
-  for (int i = 0; i < 3 ; i++){
-    if(resposta.lugar == lugar) acertou ++;
-    else if(resposta.arma == arma) acertou++;
-    else if(resposta.pessoa == pessoa) acertou ++;
-  }
+// Vefifica se o Palpite do jogador foi correto
+bool verificaResposta(RESPOSTA resposta, string lugar, string arma, string pessoa){
 
-  if (acertou == 3){
+  if (resposta.lugar == lugar && resposta.arma == arma && resposta.pessoa == pessoa){
     cout << "PARABENS VOCE DESCOBRIU O ASSASSINO!!! " + pessoa + " matou com um(a) " + arma + " no(a) " + lugar << endl;  
-    return acertou;
+    return true;
   }
   else{
     cout << "Voce errou, tente novamente na proxima rodada" << endl;
-    return acertou;
+    return false;
   }
 }
 
@@ -232,12 +232,12 @@ void sorteia(JOGADOR *bot1, JOGADOR *bot2, JOGADOR *usuario, DADOS base, string 
 		for(int j = 0; j < 8; j++){
 			string algo = tudo[j];
 
-			if(verifica(algo,base.lugares) == 1){
-				retiraLugar(usuario,algo);
-			}else if(verifica(algo,base.armas) == 1){
-				retiraArma(usuario,algo);
-			}else if(verifica(algo,base.pessoas) == 1){
-				retiraPessoa(usuario,algo);
+			if(verifica(algo, base.lugares) == 1){
+				retiraLugar(usuario, algo);
+			}else if(verifica(algo, base.armas) == 1){
+				retiraArma(usuario, algo);
+			}else if(verifica(algo, base.pessoas) == 1){
+				retiraPessoa(usuario, algo);
 			}
 			usuario->cartas[j] = algo;
 			i -= 1;
@@ -246,7 +246,7 @@ void sorteia(JOGADOR *bot1, JOGADOR *bot2, JOGADOR *usuario, DADOS base, string 
 	}
 	
 }
-
+// Realiza a resposta do jogo
 void sorteiaResposta(RESPOSTA* resposta, DADOS base){
     srand(time(0));
     resposta->lugar = base.lugares[rand() % 9];
@@ -254,24 +254,31 @@ void sorteiaResposta(RESPOSTA* resposta, DADOS base){
     resposta->pessoa = base.pessoas[rand() % 9];
 }
 
-void mostraMenu(){
-	cout << ("Escolha uma opcao\n");
-	cout << ("1 - Perguntar ao bot1\n");
-  	cout << ("2 - Perguntar ao bot2\n");
-  	cout << ("3 - Dar um palpite\n");
-    cout << ("4 - Para olhar suas cartas\n");
-  	cout << ("5 - Sair\n");
-  	cout << ("Opcao> ");
+// Menu do jogo
+void mostraMenu(JOGADOR usuario){
+  cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+  cout << "-=-=                          Sua vez de jogar ...                           =-=-" << endl;
+  cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+  mostraPossiveis(usuario);
+  cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+	cout << "Escolha uma opcao" << endl;
+	cout << "1 - Perguntar ao bot1" << endl;
+  cout << "2 - Perguntar ao bot2" << endl;
+  cout << "3 - Dar um palpite" << endl;
+  cout << "4 - Para olhar suas cartas" << endl;
+  cout << "5 - Sair" << endl;
+  cout << "Opcao> ";
 }
 
+// Mostra quais as cartas possíveis que um jogador pode perguntar ao outro jogador
 void mostraPossiveis(JOGADOR usuario){
 
-	cout << "POSSIBILIDADES DE LUGARES PARA O JOGADOR:\n" << endl;
+	cout << "POSSIBILIDADES DE LUGARES PARA O JOGADOR:" << endl;
 	for(int i = 0; i < usuario.index[0]; i++){
 		if (i != usuario.index[0] - 1) cout << usuario.lugares[i] + ", ";
 		else cout << usuario.lugares[i] + "." << endl << endl;
 	}
-	cout << "POSSIBILIDADES DE ARMAS PARA O JOGADOR:\n" << endl;
+	cout << "POSSIBILIDADES DE ARMAS PARA O JOGADOR:" << endl;
 	for(int i = 0; i < usuario.index[1]; i++){
 		if (i != usuario.index[1] - 1) cout << usuario.armas[i] + ", ";
 		else cout << usuario.armas[i] + "." << endl << endl;	
@@ -283,7 +290,7 @@ void mostraPossiveis(JOGADOR usuario){
 	}
 }
 
-//TODO
+// Mostra as cartas que foram sortadas para o jogador
 void mostrarCartasJogador(JOGADOR usuario){
     cout << "Mostrando suas cartas ..." << endl << endl;
 	  for(int i = 0; i < 8; i++) {
@@ -292,7 +299,7 @@ void mostrarCartasJogador(JOGADOR usuario){
 	}  
 }
 
-//Cria o array com as 24 cartas que sobraram
+// Cria o array com as 24 cartas que sobraram
 void criaBaralho(DADOS base, RESPOSTA resposta, string tudo[]){
 	int i = 0;
   
@@ -318,6 +325,7 @@ void criaBaralho(DADOS base, RESPOSTA resposta, string tudo[]){
 	}
 }
 
+// Verifica se o jogador possui alguma carta que foi lhe passada como cenário do crime
 string verificaCartas(JOGADOR *bot, string lugar, string arma, string pessoa, JOGADOR *jogador){
     srand(time(0));
     int mudado;
@@ -359,102 +367,141 @@ string verificaCartas(JOGADOR *bot, string lugar, string arma, string pessoa, JO
   }
 }
 
-void checaResposta(JOGADOR *bot, string resposta){
+void checaResposta(JOGADOR *bot, string resposta, string palpiteBotLugar, string palpiteBotArma, string palpiteBotPessoa){
     if(verifica(resposta, bot->lugares) == 1){
-        retiraLugar(bot,resposta);
+        retiraLugar(bot, resposta);
     }
     else if(verifica(resposta, bot->armas) == 1){
-        retiraArma(bot,resposta);
+        retiraArma(bot, resposta);
+    }
+    else if(verifica(resposta, bot->pessoas) == 1){
+        retiraPessoa(bot, resposta);
     }
     else{
-        retiraPessoa(bot,resposta);
+      retiraLugar(bot, palpiteBotLugar);
+      retiraArma(bot, palpiteBotArma);
+      retiraPessoa(bot, palpiteBotPessoa);
     }
 }
 
 void exibeArray(string array[]){
     for(int i = 0; i < 3; i++){
-        if(i == 2){
-            cout << array[i] + "." << endl;
-        }if(array[i] == ""){
-            continue;
-        }
-        else{
-            cout << array[i] + ", ";
+        if (i == 2){
+          cout << array[i] + "." << endl;
+        } else {
+          cout << array[i] + ", ";
         }
     }
 }
-int botajogar(JOGADOR *botjogando, JOGADOR *outroBot, JOGADOR *jogador) {
-    if(botjogando->index[0] == 1 && botjogando->index[1] == 1 && botjogando->index[2] == 1){
-        return 3;
-    }
-  string palpiteBotLugar;
-  string palpiteBotArma;
-  string palpiteBotPessoa;
-  int aux = rand()%2;
 
-  if (botjogando->prioridades[0] == "") {
-		palpiteBotLugar = botjogando->lugares[rand()%botjogando->index[0]];
-  }
-  else {
+bool botaJogar(JOGADOR *botjogando, JOGADOR *outroBot, JOGADOR *jogador, int countPrioridade, RESPOSTA resposta) {
+  srand(time(0));
+  int chanceBotTentar = rand() % 10;
+
+  if ((countPrioridade == 0 || countPrioridade == 1) && chanceBotTentar < 7) {
+      cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+      if(botjogando->index[0] == 1 && botjogando->index[1] == 1 && botjogando->index[2] == 1){
+          return true;
+      }
+    string palpiteBotLugar;
+    string palpiteBotArma;
+    string palpiteBotPessoa;
+    int aux = rand() % 2;
+
+    if (botjogando->prioridades[0] == "") {
+    palpiteBotLugar = botjogando->lugares[rand() % botjogando->index[0]];
+    } else {
     palpiteBotLugar = botjogando->prioridades[0];
-  }
-  
-  if (botjogando->prioridades[1] == "") {
-		palpiteBotArma = botjogando->armas[rand()%botjogando->index[1]];
-  }
-  else {
+    }
+    if (botjogando->prioridades[1] == "") {
+    palpiteBotArma = botjogando->armas[rand() % botjogando->index[1]];
+    } else {
     palpiteBotArma = botjogando->prioridades[1];
-  }
-  
-  if (botjogando->prioridades[2] == "") {
-		palpiteBotPessoa = botjogando->pessoas[rand()%botjogando->index[2]];
-  }
-  else {
+    }
+    if (botjogando->prioridades[2] == "") {
+    palpiteBotPessoa = botjogando->pessoas[rand() % botjogando->index[2]];
+    } else {
     palpiteBotPessoa = botjogando->prioridades[2];
+    }
+    botjogando->prioridades[0] = palpiteBotLugar;
+    botjogando->prioridades[1] = palpiteBotArma;
+    botjogando->prioridades[2] = palpiteBotPessoa;
+
+    if (aux == 0) {
+    cout << "=-=-                    O bot perguntou para o outro bot.                    =-=-" << endl;
+    verificaCartas(outroBot, palpiteBotLugar, palpiteBotArma, palpiteBotPessoa, botjogando);
+    } else {
+        string possiveis[3];
+        int index = 0;
+        
+        if (verifica(palpiteBotLugar, jogador->cartas)){
+            possiveis[index] = palpiteBotLugar;
+            index++;
+        }
+        if (verifica(palpiteBotArma, jogador->cartas)){
+            possiveis[index] = palpiteBotArma;
+            index++;
+        }
+        if (verifica(palpiteBotPessoa, jogador->cartas)){
+            possiveis[index] = palpiteBotPessoa;
+            index++;
+        }
+
+        cout << "A pergunta do bot para voce foi:" << endl;
+        cout << "Lugar: " + palpiteBotLugar << endl;
+        cout << "Arma: " + palpiteBotArma << endl;
+        cout << "Pessoa: " + palpiteBotPessoa << endl;
+        
+        if (index == 0){
+            cout << "Voce nao possui nenhuma carta." << endl;
+            countPrioridade++;
+        } else {
+            string responde;
+            cout << "Voce possui: " << endl;
+            exibeArray(possiveis);
+            cout << "Qual voce quer que ele saiba? ";
+            getline(cin, responde);
+            checaResposta(botjogando, responde, palpiteBotLugar, palpiteBotArma, palpiteBotPessoa);
+            botjogando->prioridades[0] = "";
+            botjogando->prioridades[1] = "";
+            botjogando->prioridades[2] = "";
+            countPrioridade = 0;
+        }
+        return false;
+    }
   }
-  botjogando->prioridades[0] = palpiteBotLugar;
-  botjogando->prioridades[1] = palpiteBotArma;
-  botjogando->prioridades[2] = palpiteBotPessoa;
-
-  if(aux == 0) {
-  	verificaCartas(outroBot, palpiteBotLugar, palpiteBotArma, palpiteBotPessoa, botjogando);
-	}
-  else{
-
-      string possiveis[3];
-      int index = 0;
-      if(verifica(palpiteBotLugar, jogador->cartas) == 1){
-          possiveis[index] = palpiteBotLugar;
-          index++;
-      }
-      if(verifica(palpiteBotArma, jogador->cartas) == 1){
-          possiveis[index] = palpiteBotArma;
-          index++;
-      }
-      if(verifica(palpiteBotPessoa, jogador->cartas) == 1){
-          possiveis[index] = palpiteBotPessoa;
-          index++;
-      }
-
-      cout << "A pergunta do bot para você foi:" << endl;
-      cout << "Lugar: " + palpiteBotLugar << endl;
-      cout << "Arma: " + palpiteBotArma << endl;
-      cout << "Pessoa: " + palpiteBotPessoa << endl;
-      if(index == 0){
-          cout << "Você não possui nenhuma carta." << endl;
-      }else{
-          string responde;
-          cout << "Você possui: " << endl;
-          exibeArray(possiveis);
-          cout << "Qual você quer que ele saiba? ";
-          getline(cin, responde);
-          checaResposta(botjogando,responde);
-          
-      }
-  }
-  return 0;
+   if ((countPrioridade == 1 || countPrioridade == 2) && chanceBotTentar >= 7){
+    if (verificaResposta(resposta, botjogando->prioridades[0], botjogando->prioridades[1], botjogando->prioridades[2])) {
+      return true;
+    }
+    else {
+      botjogando->prioridades[0] = "";
+      botjogando->prioridades[1] = "";
+      botjogando->prioridades[2] = "";
+      countPrioridade = 0;
+      return false;
+    } 
+   }
+  return false;  
 }
 
+string ajeitaPalavra(string palavra) {
+    string aux = "";
+    aux += toupper(palavra[0]);
+
+    for(int i = 1; i < palavra.size(); i++) {
+        aux += tolower(palavra[i]);
+    }
+    return aux;
+}
+
+void cls(){
+    if(getenv("windir") == NULL){
+        system("clear");
+    } else {
+        system("cls");
+    }
+}
 
 int main(void) {
 
@@ -468,7 +515,7 @@ int main(void) {
   //Define os indices para auxiliar
   defineIndices(&bot1, &bot2, &usuario);
   //Inicializando prioridades como vazio
-  definePrioridades(&bot1,&bot2);
+  definePrioridades(&bot1, &bot2);
 
   //Cria as cartas do jogo
   criaLugares(base.lugares, bot1.lugares, bot2.lugares, usuario.lugares);
@@ -481,137 +528,139 @@ int main(void) {
   criaBaralho(base, resposta, tudo);
   sorteia(&bot1, &bot2, &usuario, base, tudo);
 
-  int opcao;
+  char opcao;
   string palpiteLugar;
   string palpiteArma;
   string palpitePessoa;
+  int countPrioridade = 0;
 
   do{
-      cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-      cout << "-=-=                 Sua vez de jogar ...                  =-=-" << endl;
-      cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-      mostraPossiveis(usuario);
-      cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl << endl << endl;
-      mostraMenu();
+      mostraMenu(usuario);
       cin >> opcao;
-      flush();
-      switch(opcao){
-        case 1:{
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-          cout << "Pergunte ao Bot1 se ele tem um lugar, uma arma ou uma pessoa" << endl;
-          cout << "Digite a lugar: ";
-          getline(cin, palpiteLugar);
-          cout << "Digite a arma: ";
-          getline(cin, palpiteArma);
-          cout << "Digite a pessoa: ";
-          getline(cin, palpitePessoa);
-          cout << "\n";
-          cout << verificaCartas(&bot1, palpiteLugar, palpiteArma, palpitePessoa, &usuario) << endl << endl;
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl << endl << endl;
-          int cont;
-          cont = botajogar(&bot1,&bot2,&usuario);
-          if(cont == 3){
-              opcao = 5;
-              cout << "BOT 1 DEU UM PALPITE E GANHOU O JOGO!" << endl;
-              break;
-          }
-          cont = botajogar(&bot2,&bot1,&usuario);
-          if(cont == 3){
-            opcao = 5;
-            cout << "BOT 2 DEU UM PALPITE E GANHOU O JOGO!" << endl;
-            break;
-          }
-          break;
-        }
-        case 2:{
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-          cout << "Pergunte ao Bot2 se ele tem um lugar, uma arma ou uma pessoa" << endl;
-          cout << "Digite a lugar: ";
-          getline(cin, palpiteLugar);
-          cout << "Digite a arma: ";
-          getline(cin, palpiteArma);
-          cout << "Digite a pessoa: ";
-          getline(cin, palpitePessoa);
-          cout << "\n";
-          cout << verificaCartas(&bot2, palpiteLugar, palpiteArma, palpitePessoa, &usuario) << endl << endl;
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"  << endl << endl << endl;
-          int cont;
-          cont = botajogar(&bot1,&bot2,&usuario);
-          if(cont == 3){
-              opcao = 5;
-              cout << "BOT 1 DEU UM PALPITE E GANHOU O JOGO!" << endl;
-              break;
-          }
-          cont = botajogar(&bot2,&bot1,&usuario);
-          if(cont == 3){
-            opcao = 5;
-            cout << "BOT 2 DEU UM PALPITE E GANHOU O JOGO!" << endl;
-            break;
-          }      
-          break;
-        }
-        case 3:{
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-          cout << "De um palpite contendo um lugar, uma arma e uma pessoa" << endl;
-          cout << "Digite a lugar: ";
-          getline(cin, palpiteLugar);
-          cout << "Digite a arma: ";
-          getline(cin, palpiteArma);
-          cout << "Digite a pessoa: ";
-          getline(cin, palpitePessoa);
-          cout << "\n";
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-          int cont = verificaResposta(resposta, palpiteLugar, palpiteArma, palpitePessoa);
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-          if(cont == 3){
-              opcao = 5;
-          }else{
-              cont = botajogar(&bot1,&bot2,&usuario);
-              if(cont == 3){
+      flush();      
+      switch(opcao) {
+        case '1':{
+              cls();
+              cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+              cout << "Pergunte ao Bot1 se ele tem um lugar, uma arma ou uma pessoa" << endl;
+              cout << "Digite a lugar: ";
+              getline(cin, palpiteLugar);
+              palpiteLugar = ajeitaPalavra(palpiteLugar);
+              cout << "Digite a arma: ";
+              getline(cin, palpiteArma);
+              palpiteArma = ajeitaPalavra(palpiteArma);
+              cout << "Digite a pessoa: ";
+              getline(cin, palpitePessoa);
+              palpitePessoa = ajeitaPalavra(palpitePessoa);
+              cout << endl;
+              cout << verificaCartas(&bot1, palpiteLugar, palpiteArma, palpitePessoa, &usuario) << endl << endl;
+              
+              bool cont = botaJogar(&bot1, &bot2, &usuario, countPrioridade, resposta);
+              cls();
+
+              if(cont) {
                   opcao = 5;
                   cout << "BOT 1 DEU UM PALPITE E GANHOU O JOGO!" << endl;
                   break;
               }
-              cont = botajogar(&bot2,&bot1,&usuario);
-              if(cont == 3){
+              cont = botaJogar(&bot2, &bot1, &usuario, countPrioridade, resposta);
+              
+              if(cont) {
                   opcao = 5;
                   cout << "BOT 2 DEU UM PALPITE E GANHOU O JOGO!" << endl;
                   break;
               }
+              break;
           }
-          break;
-        }
-        case 4:{
-          mostrarCartasJogador(usuario);
-          break;
+          case '2': {
+              cls();
+              cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+              cout << "Pergunte ao Bot2 se ele tem um lugar, uma arma ou uma pessoa" << endl;
+              cout << "Digite a lugar: ";
+              getline(cin, palpiteLugar);
+              palpiteLugar = ajeitaPalavra(palpiteLugar);
+              cout << "Digite a arma: ";
+              getline(cin, palpiteArma);
+              palpiteArma = ajeitaPalavra(palpiteArma);
+              cout << "Digite a pessoa: ";
+              getline(cin, palpitePessoa);
+              palpitePessoa = ajeitaPalavra(palpitePessoa);
+              cout << endl;
+              cout << verificaCartas(&bot2, palpiteLugar, palpiteArma, palpitePessoa, &usuario) << endl << endl;
 
-        }
-        case 5:{
-          break;
-        }
-        default:{
-          cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
-          cout << "\n\nOPCAO INVALIDA! TENTE NOVAMENTE\n\n\n";
-          break;
-        }
+              bool cont = botaJogar(&bot1, &bot2, &usuario, countPrioridade, resposta);
+              cls();
 
+              if(cont){
+                  opcao = 5;
+                  cout << "BOT 1 DEU UM PALPITE E GANHOU O JOGO!" << endl;
+                  break;
+              }
+              cont = botaJogar(&bot2, &bot1, &usuario, countPrioridade, resposta);
+              
+              if(cont){
+                  opcao = 5;
+                  cout << "BOT 2 DEU UM PALPITE E GANHOU O JOGO!" << endl;
+                  break;
+              }      
+              break;
+          }
+          case '3':{
+              cls();
+              cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+              cout << "De um palpite contendo um lugar, uma arma e uma pessoa" << endl;
+              cout << "Digite a lugar: ";
+              getline(cin, palpiteLugar);
+              palpiteLugar = ajeitaPalavra(palpiteLugar);
+              cout << "Digite a arma: ";
+              getline(cin, palpiteArma);
+              palpiteArma = ajeitaPalavra(palpiteArma);
+              cout << "Digite a pessoa: ";
+              getline(cin, palpitePessoa);
+              palpitePessoa = ajeitaPalavra(palpitePessoa);
+              cout << endl;
+              cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+              
+              bool cont = verificaResposta(resposta, palpiteLugar, palpiteArma, palpitePessoa);
+              cls();
+
+              cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+              
+              if(cont){
+                  opcao = 5;
+              } else {
+                  cont = botaJogar(&bot1, &bot2, &usuario, countPrioridade, resposta);
+                  if(cont){
+                      opcao = 5;
+                      cout << "BOT 1 DEU UM PALPITE E GANHOU O JOGO!" << endl;
+                      break;
+                  }
+                  cont = botaJogar(&bot2, &bot1, &usuario, countPrioridade, resposta);
+                  if(cont){
+                      opcao = 5;
+                      cout << "BOT 2 DEU UM PALPITE E GANHOU O JOGO!" << endl;
+                      break;
+                  }
+              }
+              break;
+              }
+          case '4':{
+              cls();
+              mostrarCartasJogador(usuario);
+              cout << "Pressione qualquer tecla e aperte ENTER para continuar...";
+              getchar();
+              break;
+          }
+          case '5':{
+              break;
+          }
+          default:{
+              cls();
+              cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-" << endl;
+              cout << endl << endl << "OPCAO INVALIDA! TENTE NOVAMENTE" << endl << endl << endl;
+              break;
+          }
       }
-    
-
-  } while(opcao != 5);
-  
-  //Escolha uma opção
-  //1 - Perguntar ao bot1
-  //2 - Perguntar ao bot2
-  //3 - Dar um palpite
-  //4 - Olhar suas cartas
-  //5 - Sair
-  //Opção> 1
-  //Digite a pessoa:
-  //Digite a arma:
-  //Digite o lugar:
-  //Bot1 não possui nenhum deles
-  //Bot1 possui X
-  
+    } while(opcao != '5');
   return 0;
-}          
+}
