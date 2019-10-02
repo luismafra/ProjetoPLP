@@ -11,9 +11,9 @@ getArma :: Tuple -> String
 getLugares :: Tuple -> [String]
 getArmas :: Tuple -> [String]
 getPessoas :: Tuple -> [String]
-remove :: String -> [String] -> [String]
+remove :: (Eq t) => t -> [t] -> [t]
 sorteiaResposta :: Tuple -> IO Tuple
-criaBaralho :: Tuple -> Tuple -> IO [String]
+criaBaralho :: Tuple -> Tuple -> [String]
 
 getLugar (RESPOSTA lugar arma pessoa) = lugar
 getArma (RESPOSTA lugar arma pessoa) = arma
@@ -31,14 +31,8 @@ sorteiaResposta(DADOS lugares armas pessoas) = do
     let resposta = RESPOSTA (lugares!!x) (armas!!y) (pessoas!!z)
     return resposta
 
-criaBaralho (DADOS lugares armas pessoas) (RESPOSTA lugar arma pessoa) = do
-    let tudo = lugares ++ armas ++ pessoas
-    let tudo2 = remove lugar tudo
-    let tudo3 = remove arma tudo2
-    let tudo4 = remove pessoa tudo3
-    return tudo4
-
-
+criaBaralho (DADOS lugares armas pessoas) (RESPOSTA lugar arma pessoa) = 
+    remove pessoa (remove lugar (remove arma [x | x <- lugares ++ armas ++ pessoas]))
 
 main = do 
     let lugares = ["Lavanderia", "Banco" , "Estadio", "Cinema", "Floresta", "Escola", "Igreja", "Shopping", "Praia"]
@@ -52,12 +46,4 @@ main = do
     let bot1 = JOGADOR lugares armas pessoas prioridades cartas
     let bot2 = JOGADOR lugares armas pessoas prioridades cartas
     resposta <- sorteiaResposta base
-    baralho <- criaBaralho base resposta
-    print(getArma resposta)
-    print(getLugar resposta)
-    print(getPessoa resposta)
-    putStrLn $ show baralho
-
-
-
-
+    let baralho = criaBaralho base resposta
