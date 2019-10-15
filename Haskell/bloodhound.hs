@@ -1,16 +1,26 @@
-import System.Random(randomRIO)
+-- Por favor, rodar o codigo com runhaskell bloodhound.hs
+
 import Control.Monad
 import Data.Char
+import System.Random(randomRIO)
+-- Comando para instalar o package Random: cabal install random
 
-
+limpaTela :: String -> IO ()
+limpaTela frase = do
+    let clear = putStr "\ESC[2J"
+    clear
+    print frase
+     
 data Tuple = JOGADOR [String] [String] [String] [String] [String] |
              DADOS [String] [String] [String] |
              RESPOSTA String String String
 
 getLugar :: Tuple -> String
 getLugar (RESPOSTA lugar arma pessoa) = lugar
+
 getArma :: Tuple -> String
 getArma (RESPOSTA lugar arma pessoa) = arma
+
 getPessoa :: Tuple -> String
 getPessoa (RESPOSTA lugar arma pessoa) = pessoa
 
@@ -178,8 +188,10 @@ main = do
     let pessoa = JOGADOR lugares armas pessoas prioridades []
     let bot1 = JOGADOR lugares armas pessoas prioridades []
     let bot2 = JOGADOR lugares armas pessoas prioridades []
+    
     resposta <- sorteiaResposta base
     let baralho = criaBaralho base resposta
+
     aux <- sorteiaCartas 8 baralho base []
     let pessoa = fst aux
     let baralho = snd aux
