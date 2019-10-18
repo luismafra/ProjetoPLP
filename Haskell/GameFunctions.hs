@@ -8,7 +8,9 @@ module GameFunctions(
 
 import Control.Monad
 import System.Random(randomRIO)
--- Comando para instalar o package Random: cabal install random
+
+-- Comando para instalar o package Random: cabal update
+-- Comando para instalar o package Random: cabal install Random
 
 import Util
 import Structs
