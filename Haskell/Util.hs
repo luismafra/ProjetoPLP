@@ -14,6 +14,7 @@ remove elemento lista = filter (/= elemento) lista
 ajeitaPalavra :: String -> String
 ajeitaPalavra palavra = (map toUpper (take 1 palavra) ) ++ (map toLower (drop 1 palavra))
 
+
 getPalpiteLugar :: Int -> [String] -> IO String
 getPalpiteLugar i lugares
     |i == 1 = return ""

@@ -5,12 +5,14 @@ module GameFunctions(
     start
 ) where
 
+
 import Control.Monad
 import System.Random(randomRIO)
 -- Comando para instalar o package Random: cabal install random
 
 import Util
 import Structs
+
 
 sorteiaResposta :: Tuple -> IO Tuple
 sorteiaResposta(DADOS lugares armas pessoas) = do
@@ -52,7 +54,7 @@ vezDoJogador (JOGADOR lugares armas pessoas prioridades cartas countPrioridade) 
     palpitePessoa <- getPalpitePessoa 0 basePessoas
     let botPossui = verificaCartas [palpiteLugar,palpiteArma,palpitePessoa] botCartas
     if((length botPossui) == 0) then
-        return (JOGADOR lugares armas pessoas prioridades cartas 0,"O bot não possui nenhuma das 3 cartas")
+        return (JOGADOR lugares armas pessoas prioridades cartas 0,"O bot nao possui nenhuma das 3 cartas")
     else do
         x <- randomRIO(0,((length botPossui)-1)::Int)
         let retorno = botPossui!!x
@@ -158,9 +160,9 @@ realizaPalpite resposta  (DADOS baseLugares baseArmas basePessoas) = do
     palpiteArma <- getPalpiteArma 0 baseArmas
     palpitePessoa <- getPalpitePessoa 0 basePessoas
     if(verificaResposta resposta palpiteLugar palpiteArma palpitePessoa) then
-        return ("PARABÉNS, VOCÊ VENCEU O JOGO!", True)
+        return ("PARABENS, VOCE VENCEU O JOGO!, " ++  palpitePessoa ++ " matou com um(a) " ++  palpiteArma ++ " no(a) " ++ palpiteLugar,  True)
     else
-        return ("VOCÊ ERROU!", False)
+        return ("VOCE ERROU!", False)
 
 
 jogadorResponde :: Int -> [String] -> IO String
@@ -176,7 +178,7 @@ jogadorResponde i jogadorPossui
         if(elem resposta jogadorPossui) then do
             return resposta
         else do
-            putStrLn "Essa não é uma das opções"
+            putStrLn "Essa nao e uma das opcoes"
             jogadorResponde 0 jogadorPossui
 
 start :: Tuple -> Tuple -> Tuple -> Tuple -> Tuple -> String -> IO()
@@ -192,8 +194,8 @@ start pessoa bot1 bot2 resposta base opcao
             putStrLn ""
             aux <- vezDoBot "bot1" bot1 bot2 pessoa resposta
             let bot1 = fst aux
-            if(snd aux == "WIN") then do
-                putStrLn "O BOT 1 VENCEU O JOGO!!!!"
+            if(snd aux == "WIN") then do     
+                putStrLn "O BOT 1 VENCEU O JOGO!!!!" 
             else do
                 putStrLn (snd aux)
                 putStrLn ""
@@ -213,7 +215,7 @@ start pessoa bot1 bot2 resposta base opcao
             aux <- vezDoBot "bot1" bot1 bot2 pessoa resposta
             let bot1 = fst aux
             if(snd aux == "WIN") then do
-                putStrLn "O BOT 1 VENCEU O JOGO!!!!"
+                putStrLn "O BOT 1 VENCEU O JOGO!!!! "
             else do
                 putStrLn (snd aux)
                 putStrLn ""
