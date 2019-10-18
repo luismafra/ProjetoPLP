@@ -1,17 +1,16 @@
--- Por favor, rodar o codigo com runhaskell bloodhound.hs
+module GameFunctions(
+    sorteiaResposta,
+    sorteiaCartas,
+    criaBaralho,
+    start
+) where
 
 import Control.Monad
-import Data.Char
 import System.Random(randomRIO)
 -- Comando para instalar o package Random: cabal install random
 
-     
-data Tuple = JOGADOR [String] [String] [String] [String] [String] Int |
-             DADOS [String] [String] [String] |
-             RESPOSTA String String String
-
-remove :: (Eq t) => t -> [t] -> [t]
-remove elemento lista = filter (/= elemento) lista
+import Util
+import Structs
 
 sorteiaResposta :: Tuple -> IO Tuple
 sorteiaResposta(DADOS lugares armas pessoas) = do
@@ -39,56 +38,12 @@ sorteiaCartas i tudo (DADOS lugares armas pessoas) cartas
         else
             sorteiaCartas (i - 1) novoArray (DADOS lugares armas (remove carta pessoas)) (cartas ++ [carta])
 
-ajeitaPalavra :: String -> String
-ajeitaPalavra palavra = (map toUpper (take 1 palavra) ) ++ (map toLower (drop 1 palavra))
-
 verificaResposta :: Tuple -> String -> String -> String -> Bool
 verificaResposta (RESPOSTA lugar arma pessoa) palpiteLugar palpiteArma palpitePessoa = (lugar == palpiteLugar && arma == palpiteArma && pessoa == palpitePessoa)
 
 verificaCartas :: [String] -> [String] -> [String]
 verificaCartas arrayPalpite cartasBot = 
     [x | x <- arrayPalpite, elem x cartasBot]
-
-
-getPalpiteLugar :: Int -> [String] -> IO String
-getPalpiteLugar i lugares
-    |i == 1 = return ""
-    |otherwise = do
-        putStrLn $ "Digite o lugar: "
-        palpiteLugar <- getLine
-        let aux = ajeitaPalavra palpiteLugar
-        if(elem aux lugares) then do
-            return aux
-        else do
-            putStrLn "O lugar inserido é inválido"
-            getPalpiteLugar 0 lugares
-
-getPalpiteArma :: Int -> [String] -> IO String
-getPalpiteArma i armas
-    |i == 1 = return ""
-    |otherwise = do
-        putStrLn $ "Digite a arma: "
-        palpiteArma <- getLine
-        let aux = ajeitaPalavra palpiteArma
-        if(elem aux armas) then do
-            return aux
-        else do
-            putStrLn "A arma inserida é inválida"
-            getPalpiteArma 0 armas
-
-
-getPalpitePessoa :: Int -> [String] -> IO String
-getPalpitePessoa i pessoas
-    |i == 1 = return ""
-    |otherwise = do
-        putStrLn $ "Digite a pessoa: "
-        palpitePessoa <- getLine
-        let aux = ajeitaPalavra palpitePessoa
-        if(elem aux pessoas) then do
-            return aux
-        else do
-            putStrLn "A pessoa inserida é inválida"
-            getPalpitePessoa 0 pessoas
 
 vezDoJogador :: Tuple -> Tuple -> Tuple -> IO (Tuple, String)
 vezDoJogador (JOGADOR lugares armas pessoas prioridades cartas countPrioridade) (JOGADOR botLugares botArmas botPessoas botPrioridades botCartas countPrioridadeBot) (DADOS baseLugares baseArmas basePessoas) = do
@@ -328,31 +283,3 @@ mostraMenu pessoa = do
     putStrLn $ "4 - Olhar suas cartas"
     putStrLn $ "5 - Sair"
     putStrLn $ "Opcao> "
-
-main = do 
-    let lugares = ["Lavanderia", "Banco" , "Estadio", "Cinema", "Floresta", "Escola", "Igreja", "Shopping", "Praia"]
-    let armas = ["Machado", "Pa", "Arma quimica", "Revolver", "Faca", "Pe de cabra", "Veneno", "Corda", "Tesoura"]
-    let pessoas = ["Johann", "Matias", "Clarisse", "Alfred", "Jasmine", "Rosa", "Taylor", "Solomon", "Viktor"]
-    let prioridades = ["", "", ""]
-
-    let base = DADOS lugares armas pessoas
-    let pessoa = JOGADOR lugares armas pessoas prioridades [] 0
-    let bot1 = JOGADOR lugares armas pessoas prioridades [] 0
-    let bot2 = JOGADOR lugares armas pessoas prioridades [] 0
-    
-    resposta <- sorteiaResposta base
-    let baralho = criaBaralho base resposta
-
-    aux <- sorteiaCartas 8 baralho base []
-    let pessoa = fst aux
-    let baralho = snd aux
-
-    aux <- sorteiaCartas 8 baralho base []
-    let bot1 = fst aux
-    let baralho = snd aux
-
-    aux <- sorteiaCartas 8 baralho base []
-    let bot2 = fst aux
-    let baralho = snd aux
-
-    start pessoa bot1 bot2 resposta base "0"
