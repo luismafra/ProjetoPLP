@@ -181,6 +181,12 @@ jogadorResponde i jogadorPossui
             putStrLn "Essa nao e uma das opcoes"
             jogadorResponde 0 jogadorPossui
 
+
+imprimeResposta :: Tuple -> IO()
+imprimeResposta (RESPOSTA lugar arma pessoa) = do
+    putStrLn $ pessoa ++ " matou com um(a) " ++  arma ++ " no(a) " ++ lugar
+            
+
 start :: Tuple -> Tuple -> Tuple -> Tuple -> Tuple -> String -> IO()
 start pessoa bot1 bot2 resposta base opcao
     |opcao == "5" = putStrLn "FIM DE JOGO"
@@ -196,6 +202,7 @@ start pessoa bot1 bot2 resposta base opcao
             let bot1 = fst aux
             if(snd aux == "WIN") then do     
                 putStrLn "O BOT 1 VENCEU O JOGO!!!!" 
+                imprimeResposta resposta
             else do
                 putStrLn (snd aux)
                 putStrLn ""
@@ -203,6 +210,7 @@ start pessoa bot1 bot2 resposta base opcao
                 let bot2 = fst aux
                 if(snd aux == "WIN") then do
                     putStrLn "O BOT 2 VENCEU O JOGO!!!!"
+                    imprimeResposta resposta
                 else do
                     putStrLn (snd aux)
                     putStrLn ""
@@ -216,6 +224,7 @@ start pessoa bot1 bot2 resposta base opcao
             let bot1 = fst aux
             if(snd aux == "WIN") then do
                 putStrLn "O BOT 1 VENCEU O JOGO!!!! "
+                imprimeResposta resposta
             else do
                 putStrLn (snd aux)
                 putStrLn ""
@@ -223,6 +232,7 @@ start pessoa bot1 bot2 resposta base opcao
                 let bot2 = fst aux
                 if(snd aux == "WIN") then do
                     putStrLn "O BOT 2 VENCEU O JOGO!!!!"
+                    imprimeResposta resposta
                 else do
                     putStrLn (snd aux)
                     putStrLn ""
@@ -238,6 +248,7 @@ start pessoa bot1 bot2 resposta base opcao
                 let bot1 = fst aux
                 if(snd aux == "WIN") then do
                     putStrLn "O BOT 1 VENCEU O JOGO!!!!"
+                    imprimeResposta resposta
                 else do
                     putStrLn (snd aux)
                     putStrLn ""
@@ -245,6 +256,7 @@ start pessoa bot1 bot2 resposta base opcao
                     let bot2 = fst aux
                     if(snd aux == "WIN") then do
                         putStrLn "O BOT 2 VENCEU O JOGO!!!!"
+                        imprimeResposta resposta
                     else do
                         putStrLn (snd aux)
                         putStrLn ""
