@@ -54,6 +54,7 @@ string ajeitaPalavra(string palavra) {
     return aux;
 }
 
+// Define as prioridades dos jogares
 void definePrioridades(JOGADOR *bot1, JOGADOR *bot2){
     bot1->prioridades[0] = "";
     bot1->prioridades[1] = "";
@@ -165,6 +166,7 @@ void retiraLugar(JOGADOR *bot, string algo){
 	  bot->lugares[i] = bot->lugares[bot->index[0]];    
 }
 
+// remove arma das possibilidades
 void retiraArma(JOGADOR *bot, string algo){
 	int i;
 	for(i = 0; i < bot->index[1]; i++){
@@ -176,6 +178,7 @@ void retiraArma(JOGADOR *bot, string algo){
 	bot->index[1]--;
 }
 
+// remove determinada pessoa das possibilidades 
 void retiraPessoa(JOGADOR *bot, string algo){
 	int i;
 	for(i = 0; i < bot->index[2]; i++){
@@ -197,6 +200,7 @@ void retiraTudo(string tudo[], string algo, int index){
 	tudo[i] = tudo[index - 1];
 }
 
+// Realiza o sorteio das cartas aos jogadores
 void sorteia(JOGADOR *bot1, JOGADOR *bot2, JOGADOR *usuario, DADOS base, string tudo[]){
     srand(time(0));
 	int i = 24;
