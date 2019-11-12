@@ -1,0 +1,36 @@
+[
+    
+    {
+    "lugares": ["Lavanderia", "Banco" , "Estadio", "Cinema", "Floresta", "Escola", "Igreja", "Shopping", "Praia"],
+    "armas": ["Machado", "Pa", "Arma quimica", "Revolver", "Faca", "Pe de cabra", "Veneno", "Corda", "Tesoura"],
+    "pessoas": ["Johann", "Matias", "Clarisse", "Alfred", "Jasmine", "Rosa", "Taylor", "Solomon", "Viktor"]
+    },
+
+    {
+    "nome": "Bot 1",
+    "lugares": [],
+    "armas": [],
+    "pessoas": [],
+    "cartas": [],
+    "prioridades": [],
+    "cont": 0
+    },
+
+    {
+    "nome": "Bot 2",
+    "lugares": [],
+    "armas": [],
+    "pessoas": [],
+    "cartas": [],
+    "prioridades": [],
+    "cont": 0
+    },
+
+    {
+    "nome": "Jogador",
+    "lugares": [],
+    "armas": [],
+    "pessoas": [],
+    "cartas": []
+    }
+]
