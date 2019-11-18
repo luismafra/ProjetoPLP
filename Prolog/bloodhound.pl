@@ -1,5 +1,4 @@
 :- initialization(main).
-:- use_module(library(http/json)).
 
 ehLugar(Elem,Lista, R) :-
     (member(Elem, Lista)
@@ -14,9 +13,6 @@ ehPessoa(Elem,Lista, R) :-
     -> R = true
     ;  R = false).
 
-lerJson(File) :-
-    open("./dados.json", read, Teste),
-    json_read_dict(Teste, File).
 
 remove(_, [], Lista, Lista).
 remove(Elem, [Elem | T], Lista, R):-
@@ -39,54 +35,74 @@ criaResposta(R, Resposta) :-
     nth0(X,R.armas,Arma),
     random(0,9,Y),
     nth0(Y,R.pessoas,Pessoa),
-    Resposta = [Lugar, Arma, Pessoa]. 
+    Resposta = r{lugar:Lugar,arma:Arma,pessoa:Pessoa}. 
 
 criaBaralho(Resposta, Dados, Baralho):-
-    nth0(0, Resposta, Lugar),
-    remove(Lugar, Dados.lugares, [], Lugares),
-    nth0(1, Resposta, Arma),
-    remove(Arma, Dados.armas, [], Armas),
-    nth0(2, Resposta, Pessoa),
-    remove(Pessoa, Dados.pessoas, [], Pessoas),
+    remove(Resposta.lugar, Dados.lugares, [], Lugares),
+    remove(Resposta.arma, Dados.armas, [], Armas),
+    remove(Resposta.pessoa, Dados.pessoas, [], Pessoas),
     append(Lugares, Armas, Aux),
     append(Aux, Pessoas, Baralho).
 
-player(Lugares,Armas,Pessoas,Retorno) :-
-    Retorno = jogador(Lugares,Armas,Pessoas,["","",""],[],0).
+sorteiaCartas(0,Baralho,Dados,Cartas,NovoBaralho,Pessoa) :-
+    Pessoa = r{lugares:Dados.lugares,armas:Dados.armas,pessoas:Dados.pessoas,prioridades:["","",""],cartas:Cartas,cont:0},
+    NovoBaralho = Baralho.
 
-sorteiaCartas(I,Baralho,Lugares,Armas,Pessoas,NovoBaralho,Cartas,Jogador) :-
-    I =:= 0,
-    Jogador = jogador(Lugares,Armas,Pessoas,["","",""],Cartas,0);  
+sorteiaCartas(I,Baralho,Dados,Cartas,NovoBaralho,Pessoa) :-   
     len(Baralho, R),
     random(0,R,X),
     nth0(X, Baralho, Carta),
-    remove(Carta,Baralho,[],NovoBaralho),
+    remove(Carta,Baralho,[],NovoArray),
     NewI is I - 1,
-    member(Carta,Lugares) -> 
-    remove(Carta,Lugares,[],NovosLugares),
-    append(Cartas,[Carta],R),
-    sorteiaCartas(NewI,NovoBaralho,NovosLugares,Armas,Pessoas,NovoBaralho,R,Jogador);
-    member(Carta,Armas) -> 
-    remove(Carta,Armas,[],NovasArmas),
-    append(Cartas,[Carta],R),
-    sorteiaCartas(NewI,NovoBaralho,Lugares,NovasArmas,Pessoas,NovoBaralho,R,Jogador);
-    remove(Carta,Pessoas,[],NovasPessoas),
-    append(Cartas,[Carta],R),
-    sorteiaCartas(NewI,NovoBaralho,Lugares,Armas,NovasPessoas,NovoBaralho,R,Jogador).
+    writeln(NewI),
+    (member(Carta,Dados.lugares) -> 
+    remove(Carta,Dados.lugares,[],NovosLugares),
+    append(Cartas,[Carta],NovasCartas),
+    sorteiaCartas(NewI,NovoArray,Dados.put([lugares:NovosLugares]),NovasCartas,NovoBaralho,Pessoa)
+    ;
+    member(Carta,Dados.armas) -> 
+    remove(Carta,Dados.armas,[],NovasArmas),
+    append(Cartas,[Carta],NovasCartas),
+    sorteiaCartas(NewI,NovoArray,Dados.put([armas:NovasArmas]),NovasCartas,NovoBaralho,Pessoa)
+    ;
+    remove(Carta,Dados.pessoas,[],NovasPessoas),
+    append(Cartas,[Carta],NovasCartas),
+    sorteiaCartas(NewI,NovoArray,Dados.put([pessoas:NovasPessoas]),NovasCartas,NovoBaralho,Pessoa)
+    ).
+
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,1) :-
+    vezDoJogador(Pessoa,Bot1,Dados,NovaPessoa),nl.
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,2) :-
+    vezDoJogador(Pessoa,Bot2,Dados,NovaPessoa),nl.
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,3) :-
+    realizaPalpite(Resposta,Dados),nl.
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,4) :-
+    mostraCartas(Pessoa),nl.
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,5) :-
+    writeln("FIM DE JOGO").
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,_) :-
+    mostraMenu(Pessoa),
+    read(Opcao),
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao).
 
 
 main :-
-    lerJson(File),
-    nth0(0, File, Dados),
-    player(Dados.lugares,Dados.armas,Dados.pessoas,Bot1),
-    player(Dados.lugares,Dados.armas,Dados.pessoas,Bot2),
-    player(Dados.lugares,Dados.armas,Dados.pessoas,Jogador),
+    Lugares = ["Lavanderia", "Banco" , "Estadio", "Cinema", "Floresta", "Escola", "Igreja", "Shopping", "Praia"],
+    Armas = ["Machado", "Pa", "Arma quimica", "Revolver", "Faca", "Pe de cabra", "Veneno", "Corda", "Tesoura"],
+    Pessoas = ["Johann", "Matias", "Clarisse", "Alfred", "Jasmine", "Rosa", "Taylor", "Solomon", "Viktor"],
+    Dados = r{lugares: Lugares,armas:Armas,pessoas:Pessoas},
+
     criaResposta(Dados,Resposta),
     criaBaralho(Resposta,Dados,Baralho),
-    sorteiaCartas(8,Baralho,Dados.lugares,Dados.armas,Dados.pessoas,NovoBaralho,[],Jogador),
-    Baralho = NovoBaralho,
-    sorteiaCartas(8,Baralho,Dados.lugares,Dados.armas,Dados.pessoas,NovoBaralho,[],Bot1),
-    Baralho = NovoBaralho,
-    sorteiaCartas(8,Baralho,Dados.lugares,Dados.armas,Dados.pessoas,NovoBaralho,[],Bot2),
-    Baralho = NovoBaralho,
-    writeln(Resposta), writeln(Baralho).
+
+    sorteiaCartas(8,Baralho,Dados,[],NovoBaralho,Pessoa),
+    sorteiaCartas(8,NovoBaralho,Dados,[],OutroBaralho,Bot1),
+    sorteiaCartas(8,OutroBaralho,Dados,[],BaralhoVazio,Bot2),
+    
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,0).    
