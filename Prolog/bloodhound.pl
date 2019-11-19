@@ -132,6 +132,50 @@ realizaPalpite(Resposta,Dados,Retorno) :-
 verificaCartas(Palpites,Cartas,BotPossui) :-
     exclude([X]>>(not(member(X,Palpites))), Cartas, BotPossui).
 
+vezDoJogador(Pessoa,Bot,Dados,NovaPessoa) :-
+    getPalpiteLugar(Dados.lugares,PalpiteLugar),
+    getPalpiteArma(Dados.armas,PalpiteArma),
+    getPalpitePessoa(Dados.pessoas,PalpitePessoa),
+    verificaCartas([PalpiteLugar,PalpiteArma,PalpitePessoa],Bot.cartas,BotPossui),
+    len(BotPossui,R),
+    (R =:= 0 -> writeln("O bot nao possui nenhuma das 3 cartas"),NovaPessoa = Pessoa;
+    random(0,R,X),
+    nth0(X, BotPossui, Carta),
+    write("O bot tinha "),writeln(Carta),
+    (member(Carta,Pessoa.lugares) -> remove(Carta,Pessoa.lugares,[],NovosLugares),NovaPessoa = Pessoa.put([lugares:NovosLugares]);
+    member(Carta,Pessoa.armas) -> remove(Carta,Pessoa.armas,[],NovasArmas),NovaPessoa = Pessoa.put([armas:NovasArmas]);
+    remove(Carta,Pessoa.pessoas,[],NovasPessoas),NovaPessoa = Pessoa.put([pessoas:NovasPessoas])
+    )
+    ).
+
+vezDoBot(Pessoa, Bot1, Bot2, NovoBot):-
+    len(Bot1.pessoas, X),
+    random(0, X, Y),
+    nth0(Y, Bot1.pessoas, PalpitePessoa),
+    len(Bot1.lugares, A),
+    random(0, A, B),
+    nth0(B, Bot1.lugares, PalpiteLugar),
+    len(Bot1.armas, C),
+    random(0, C, D),
+    nth0(D, Bot1.armas, PalpiteArma),
+    random(0 , 2, R),
+    (R =:= 0 -> verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Pessoa.cartas, Intercessao),
+    writeln("Qual voce deseja que o bot saiba"),
+    writeln(Intercessao),
+    read_line(Desejado),
+    (member(Desejado,Pessoa.lugares) -> remove(Desejado,Pessoa.lugares,[],NovosLugares),NovoBot = Bot1.put([lugares:NovosLugares]);
+    member(Desejado,Pessoa.armas) -> remove(Desejado,Pessoa.armas,[],NovasArmas),NovoBot = Bot1.put([armas:NovasArmas]);
+    remove(Desejado,Pessoa.pessoas,[],NovasPessoas),NovoBot = Bot1.put([pessoas:NovasPessoas]))
+    ;
+    verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Bot2.cartas, Intercessao)),
+    len(Intercessao, E),
+    random(0, E, F),
+    nth0(F, Intercessao, Desejado),
+    (member(Desejado, Bot2.lugares) -> remove(Desejado,Bot1.lugares,[],NovosLugares), NovoBot = Bot1.put([lugares:NovosLugares]);
+    member(Desejado, Bot2.armas) -> remove(Desejado,Bot1.armas,[],NovasArmas), NovoBot = Bot1.put([armas:NovasArmas]);
+    remove(Desejado, Bot1.pessoas,[], NovasPessoas), NovoBot = Bot1.put([pessoas:NovasPessoas])).
+
+
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"0") :-
     mostraMenu(Pessoa),
     read_line(Opcao),
