@@ -1,19 +1,5 @@
 :- initialization(main).
 
-ehLugar(Elem,Lista, R) :-
-    (member(Elem, Lista)
-    -> R = true
-    ;  R = false).
-ehArma(Elem,Lista, R) :-
-    (member(Elem, Lista)
-    -> R = true
-    ;  R = false).
-ehPessoa(Elem,Lista, R) :-
-    (member(Elem, Lista)
-    -> R = true
-    ;  R = false).
-
-
 remove(_, [], Lista, Lista).
 remove(Elem, [Elem | T], Lista, R):-
     append(Lista, T, R).
@@ -27,6 +13,40 @@ len([], R):-
 len([_|Y], R):-
     len(Y, L),
     R is L + 1.
+
+read_line(String) :-
+    current_input(Input),
+    read_string(Input, "\n", "\r", End, String).
+
+ajeitaPalavra(Palavra,Retorno) :-
+    string_lower(Palavra, X),firstCharUppercase(X,Retorno).
+
+firstCharUppercase(Palavra, Retorno) :-
+    string_chars(Palavra, [First|Last]),
+    atom_chars(PrimeiraLetra, [First]),
+    upcase_atom(PrimeiraLetra, Uppercase),
+    string_chars(Retorno, [Uppercase|Last]).
+
+getPalpiteLugar(Lugares,PalpiteLugar) :-
+    write("Digite o lugar: "),
+    read_line(Palpite),
+    ajeitaPalavra(Palpite,X),
+    (member(X,Lugares) -> PalpiteLugar = X; writeln("Lugar inserido é invalido"),
+    getPalpiteLugar(Lugares,PalpiteLugar)).
+
+getPalpiteArma(Armas,PalpiteArma) :-
+    write("Digite a arma: "),
+    read_line(Palpite),
+    ajeitaPalavra(Palpite,X),
+    (member(X,Armas) -> PalpiteArma = X; writeln("Arma inserida é invalida"),
+    getPalpiteArma(Armas,PalpiteArma)).
+
+getPalpitePessoa(Pessoas,PalpitePessoa) :-
+    write("Digite a pessoa: "),
+    read_line(Palpite),
+    ajeitaPalavra(Palpite,X),
+    (member(X,Pessoas) -> PalpitePessoa = X; writeln("Pessoa inserida é invalida"),
+    getPalpitePessoa(Pessoas,PalpitePessoa)).
 
 criaResposta(R, Resposta) :-
     random(0,9,N),
