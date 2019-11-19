@@ -54,7 +54,6 @@ sorteiaCartas(I,Baralho,Dados,Cartas,NovoBaralho,Pessoa) :-
     nth0(X, Baralho, Carta),
     remove(Carta,Baralho,[],NovoArray),
     NewI is I - 1,
-    writeln(NewI),
     (member(Carta,Dados.lugares) -> 
     remove(Carta,Dados.lugares,[],NovosLugares),
     append(Cartas,[Carta],NovasCartas),
@@ -70,26 +69,79 @@ sorteiaCartas(I,Baralho,Dados,Cartas,NovoBaralho,Pessoa) :-
     sorteiaCartas(NewI,NovoArray,Dados.put([pessoas:NovasPessoas]),NovasCartas,NovoBaralho,Pessoa)
     ).
 
+mostraCartas(Pessoa) :-
+    writeln(Pessoa.cartas).
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,1) :-
-    vezDoJogador(Pessoa,Bot1,Dados,NovaPessoa),nl.
+mostraPossiveis(Pessoa) :-
+    writeln("POSSIBILIDADES DE LUGARES PARA O JOGADOR:"),
+    writeln(Pessoa.lugares),
+    writeln("POSSIBILIDADES DE ARMAS PARA O JOGADOR:"),
+    writeln(Pessoa.armas),
+    writeln("POSSIBILIDADES DE PESSOAS PARA O JOGADOR:"),
+    writeln(Pessoa.pessoas).
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,2) :-
-    vezDoJogador(Pessoa,Bot2,Dados,NovaPessoa),nl.
+mostraMenu(Pessoa) :-
+    writeln("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"),
+    writeln("-=-=                          Sua vez de jogar ...                           =-=-"), 
+    writeln("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"),
+    writeln("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"),
+    mostraPossiveis(Pessoa),
+    writeln("Escolha uma opcao"),
+    writeln("1 - Perguntar ao bot1"),
+    writeln("2 - Perguntar ao bot2"),
+    writeln("3 - Dar um palpite"),
+    writeln("4 - Olhar suas cartas"),
+    writeln("5 - Sair"),
+    writeln("Opcao> ").
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,3) :-
-    realizaPalpite(Resposta,Dados),nl.
+verificaResposta(Resposta,Palpite,Retorno) :-
+    Resposta.lugar = Palpite.lugar,
+    Resposta.arma = Palpite.arma,
+    Resposta.pessoa = Palpite.pessoa,
+    write("PARABENS, VOCE VENCEU O JOGO!, "),write(Palpite.pessoa),
+    write(" matou com um(a) "),write(Palpite.arma),
+    write(" no(a) "),writeln(Palpite.lugar), Retorno = true;
+    Retorno = false.
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,4) :-
-    mostraCartas(Pessoa),nl.
+realizaPalpite(Resposta,Dados,Retorno) :-
+    getPalpiteLugar(Dados.lugares,PalpiteLugar),
+    getPalpiteArma(Dados.armas,PalpiteArma),
+    getPalpitePessoa(Dados.pessoas,PalpitePessoa),
+    verificaResposta(Resposta,r{lugar:PalpiteLugar,arma:PalpiteArma,pessoa:PalpitePessoa},Retorno).
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,5) :-
+verificaCartas(Palpites,Cartas,BotPossui) :-
+    exclude([X]>>(not(member(X,Palpites))), Cartas, BotPossui).
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"0") :-
+    mostraMenu(Pessoa),
+    read_line(Opcao),
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao).
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"1") :-
+    vezDoJogador(Pessoa,Bot1,Dados,NovaPessoa),nl,
+    start(NovaPessoa,Bot1,Bot2,Resposta,Dados,"0").
+
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"2") :-
+    vezDoJogador(Pessoa,Bot2,Dados,NovaPessoa),nl,
+    start(NovaPessoa,Bot1,Bot2,Resposta,Dados,"0").
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"3") :-
+    realizaPalpite(Resposta,Dados,Retorno),nl,
+    (Retorno -> start(Pessoa,Bot1,Bot2,Resposta,Dados,"5");
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0")
+    ).
+
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"4") :-
+    mostraCartas(Pessoa),nl,
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0").
+
+start(_,_,_,_,_,"5") :-
     writeln("FIM DE JOGO").
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,_) :-
-    mostraMenu(Pessoa),
-    read(Opcao),
-    start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao).
+start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao) :-
+    writeln("Opcao invalida"),
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0").
 
 
 main :-
@@ -105,4 +157,4 @@ main :-
     sorteiaCartas(8,NovoBaralho,Dados,[],OutroBaralho,Bot1),
     sorteiaCartas(8,OutroBaralho,Dados,[],BaralhoVazio,Bot2),
     
-    start(Pessoa,Bot1,Bot2,Resposta,Dados,0).    
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0").    
