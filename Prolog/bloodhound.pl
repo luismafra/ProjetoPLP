@@ -148,52 +148,116 @@ vezDoJogador(Pessoa,Bot,Dados,NovaPessoa) :-
     )
     ).
 
-vezDoBot(Pessoa, Bot1, Bot2, NovoBot):-
-    len(Bot1.pessoas, X),
-    random(0, X, Y),
-    nth0(Y, Bot1.pessoas, PalpitePessoa),
-    len(Bot1.lugares, A),
-    random(0, A, B),
-    nth0(B, Bot1.lugares, PalpiteLugar),
-    len(Bot1.armas, C),
-    random(0, C, D),
-    nth0(D, Bot1.armas, PalpiteArma),
-    random(0 , 2, R),
-    (R =:= 0 -> verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Pessoa.cartas, Intercessao),
-    writeln("Qual voce deseja que o bot saiba"),
-    writeln(Intercessao),
-    read_line(Desejado),
-    (member(Desejado,Pessoa.lugares) -> remove(Desejado,Pessoa.lugares,[],NovosLugares),NovoBot = Bot1.put([lugares:NovosLugares]);
-    member(Desejado,Pessoa.armas) -> remove(Desejado,Pessoa.armas,[],NovasArmas),NovoBot = Bot1.put([armas:NovasArmas]);
-    remove(Desejado,Pessoa.pessoas,[],NovasPessoas),NovoBot = Bot1.put([pessoas:NovasPessoas]))
-    ;
-    verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Bot2.cartas, Intercessao)),
-    len(Intercessao, E),
-    random(0, E, F),
-    nth0(F, Intercessao, Desejado),
-    (member(Desejado, Bot2.lugares) -> remove(Desejado,Bot1.lugares,[],NovosLugares), NovoBot = Bot1.put([lugares:NovosLugares]);
-    member(Desejado, Bot2.armas) -> remove(Desejado,Bot1.armas,[],NovasArmas), NovoBot = Bot1.put([armas:NovasArmas]);
-    remove(Desejado, Bot1.pessoas,[], NovasPessoas), NovoBot = Bot1.put([pessoas:NovasPessoas])).
+verificaCount(0,X) :- random(0,2,X).
+verificaCount(1,1).
+verificaCount(2,0).
 
+getPalpiteLugarBot(Bot,PalpiteLugar) :-
+    Bot.cont > 0, nth0(0,Bot.prioridades,PalpiteLugar);
+    len(Bot.lugares, A),
+    random(0, A, B),
+    nth0(B, Bot.lugares, PalpiteLugar).
+
+getPalpiteArmaBot(Bot,PalpiteArma) :-
+    Bot.cont > 0, nth0(1,Bot.prioridades,PalpiteArma);
+    len(Bot.armas, A),
+    random(0, A, B),
+    nth0(B, Bot.armas, PalpiteArma).
+
+getPalpitePessoaBot(Bot,PalpitePessoa) :-
+    Bot.cont > 0, nth0(2,Bot.prioridades,PalpitePessoa);
+    len(Bot.pessoas, A),
+    random(0, A, B),
+    nth0(B, Bot.pessoas, PalpitePessoa).
+
+jogadorResponde(Possiveis,Retorno) :-
+    writeln("Você possui: "),writeln(Possiveis),
+    write("Qual voce deseja que o bot saiba? "),
+    read_line(X),ajeitaPalavra(X,Resposta),
+    (member(Resposta,Possiveis) -> Retorno = Resposta;
+    writeln("Essa nao é uma das opcoes"),jogadorResponde(Possiveis,Retorno)
+    ).
+
+
+vezDoBot(Nome,Pessoa,Bot1,Bot2,Resposta,NovoBot,Acabou) :-
+    len(Bot1.pessoas,X),len(Bot1.armas,Y),len(Bot1.lugares,Z),
+    Soma is X + Y + Z,Soma =:= 3,Acabou = true; Bot1.cont =:= 3,Acabou = true;
+    random(0,10,Chance),
+    (
+        (Chance > 6,Bot1.cont > 0) -> nth0(0,Bot1.prioridades,Lugar),nth0(1,Bot1.prioridades,Arma),
+        nth0(2,Bot1.prioridades, Pessoa), verificaResposta(Resposta,r{lugar:Lugar,arma:Arma,pessoa:Pessoa},Retorno),
+        (Retorno -> Acabou = true, NovoBot = Bot1;
+            writeln("O bot tentou chutar e errou"),NovoBot = Bot1,Acabou = false)
+        ;
+        verificaCount(Bot1.cont,Aux),
+        getPalpiteLugarBot(Bot1,PalpiteLugar),
+        getPalpiteArmaBot(Bot1,PalpiteArma),
+        getPalpitePessoaBot(Bot1,PalpitePessoa),
+
+        (
+            Aux =:= 1 -> verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Pessoa.cartas, Intercessao),
+            writeln("A pergunta do bot para voce foi:"), 
+            write("Lugar: "),writeln(PalpiteLugar),
+            write("Arma: "),writeln(PalpiteArma),
+            write("Pessoa: "),writeln(PalpitePessoa),
+            len(Intercessao,Checkagem),
+            (
+                Checkagem =:= 0 -> writeln("Voce nao possui nenhuma carta."),
+                write("O "),write(Nome),writeln(" jogou."),
+                (Bot1.cont =:= 0 -> NovoBot = Bot1.put([cont:2,prioridades:[PalpiteLugar,PalpiteArma,PalpitePessoa]]),Acabou = false;
+                NovoBot = Bot1.put([cont:3]),Acabou = false
+                )
+            ;
+                jogadorResponde(Intercessao,Desejado),
+                write("O "),write(Nome),writeln(" jogou."),
+                (member(Desejado,Bot1.lugares) -> remove(Desejado,Bot1.lugares,[],NovosLugares),Acabou = false,NovoBot = Bot1.put([lugares:NovosLugares,cont:0]);
+                member(Desejado,Bot1.armas) -> remove(Desejado,Bot1.armas,[],NovasArmas),Acabou = false,NovoBot = Bot1.put([armas:NovasArmas,cont:0]);
+                remove(Desejado,Bot1.pessoas,[],NovasPessoas),Acabou = false,NovoBot = Bot1.put([pessoas:NovasPessoas,cont:0]))
+            )
+        ;
+            verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Bot2.cartas, Intercessao),
+            len(Intercessao, Checkagem),
+            write("O "),write(Nome),writeln(" jogou."),
+            (
+                Checkagem =:= 0 -> 
+                (Bot1.cont =:= 0 -> NovoBot = Bot1.put([cont:1,prioridades:[PalpiteLugar,PalpiteArma,PalpitePessoa]]),Acabou = false;
+                NovoBot = Bot1.put([cont:3]),Acabou = false
+                )
+            ;
+                random(0, Checkagem, F),
+                nth0(F, Intercessao, Desejado),
+                (member(Desejado, Bot2.lugares) -> remove(Desejado,Bot1.lugares,[],NovosLugares),Acabou = false, NovoBot = Bot1.put([lugares:NovosLugares,cont:0]);
+                member(Desejado, Bot2.armas) -> remove(Desejado,Bot1.armas,[],NovasArmas),Acabou = false, NovoBot = Bot1.put([armas:NovasArmas,cont:0]);
+                remove(Desejado, Bot1.pessoas,[], NovasPessoas),Acabou = false, NovoBot = Bot1.put([pessoas:NovasPessoas,cont:0]))
+            )
+        )
+    ).
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"0") :-
     mostraMenu(Pessoa),
     read_line(Opcao),
     start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao).
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,"1") :-
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"1") :-   
     vezDoJogador(Pessoa,Bot1,Dados,NovaPessoa),nl,
-    start(NovaPessoa,Bot1,Bot2,Resposta,Dados,"0").
+    vezDoBot("Bot1",Pessoa,Bot1,Bot2,Resposta,NovoBot1,Acabou1),nl,
+    vezDoBot("Bot2",Pessoa,Bot2,Bot1,Resposta,NovoBot2,Acabou2),nl,
+    start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0").
 
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"2") :-
     vezDoJogador(Pessoa,Bot2,Dados,NovaPessoa),nl,
-    start(NovaPessoa,Bot1,Bot2,Resposta,Dados,"0").
+    vezDoBot("Bot1",Pessoa, Bot1, Bot2,Resposta, NovoBot1,Acabou1),nl,
+    vezDoBot("Bot2",Pessoa, Bot2, Bot1,Resposta, NovoBot2,Acabou2),nl,
+    start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0").
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"3") :-
     realizaPalpite(Resposta,Dados,Retorno),nl,
-    (Retorno -> start(Pessoa,Bot1,Bot2,Resposta,Dados,"5");
-    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0")
+    (Retorno -> start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+    ;
+    vezDoBot("Bot1",Pessoa, Bot1, Bot2,Resposta, NovoBot1,Acabou1),nl,
+    vezDoBot("Bot2",Pessoa, Bot2, Bot1,Resposta, NovoBot2,Acabou2),nl,
+    start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
     ).
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"4") :-

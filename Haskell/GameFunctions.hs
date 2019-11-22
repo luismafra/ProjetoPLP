@@ -152,7 +152,7 @@ vezDoBot nome (JOGADOR botRodadaLugares botRodadaArmas botRodadaPessoas botRodad
                     if (elem removido botRodadaLugares) then
                         return (JOGADOR (remove removido botRodadaLugares) botRodadaArmas botRodadaPessoas botRodadaPrioridades botRodadaCartas 0, "O " ++ nome ++ " jogou.")
                     else if (elem removido botRodadaArmas) then
-  0                      return (JOGADOR botRodadaLugares (remove removido botRodadaArmas) botRodadaPessoas botRodadaPrioridades botRodadaCartas 0, "O " ++ nome ++ " jogou.")
+                        return (JOGADOR botRodadaLugares (remove removido botRodadaArmas) botRodadaPessoas botRodadaPrioridades botRodadaCartas 0, "O " ++ nome ++ " jogou.")
                     else do
                         return (JOGADOR botRodadaLugares botRodadaArmas (remove removido botRodadaPessoas) botRodadaPrioridades botRodadaCartas 0, "O " ++ nome ++ " jogou.")
 
