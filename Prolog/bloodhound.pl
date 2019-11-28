@@ -118,9 +118,7 @@ verificaResposta(Resposta,Palpite,Retorno) :-
     Resposta.lugar = Palpite.lugar,
     Resposta.arma = Palpite.arma,
     Resposta.pessoa = Palpite.pessoa,
-    write("PARABENS, VOCE VENCEU O JOGO!, "),write(Palpite.pessoa),
-    write(" matou com um(a) "),write(Palpite.arma),
-    write(" no(a) "),writeln(Palpite.lugar), Retorno = true;
+    Retorno = true;
     Retorno = false.
 
 realizaPalpite(Resposta,Dados,Retorno) :-
@@ -181,15 +179,16 @@ jogadorResponde(Possiveis,Retorno) :-
 
 vezDoBot(Nome,Pessoa,Bot1,Bot2,Resposta,NovoBot,Acabou) :-
     len(Bot1.pessoas,X),len(Bot1.armas,Y),len(Bot1.lugares,Z),
-    Soma is X + Y + Z,Soma =:= 3,Acabou = true; Bot1.cont =:= 3,Acabou = true;
+    Soma is X + Y + Z,Soma =:= 3,Acabou = true,NovoBot = Bot1; Bot1.cont =:= 3,Acabou = true,NovoBot = Bot1;
     random(0,10,Chance),
     (
-        (Chance > 6,Bot1.cont > 0) -> nth0(0,Bot1.prioridades,Lugar),nth0(1,Bot1.prioridades,Arma),
-        nth0(2,Bot1.prioridades, Pessoa), verificaResposta(Resposta,r{lugar:Lugar,arma:Arma,pessoa:Pessoa},Retorno),
+        (Chance > 6,Bot1.cont > 0) -> nth0(0,Bot1.prioridades,PalpiteLugar),nth0(1,Bot1.prioridades,PalpiteArma),
+        nth0(2,Bot1.prioridades, PalpitePessoa), verificaResposta(Resposta,r{lugar:PalpiteLugar,arma:PalpiteArma,pessoa:PalpitePessoa},Retorno),
         (Retorno -> Acabou = true, NovoBot = Bot1;
-            writeln("O bot tentou chutar e errou"),NovoBot = Bot1,Acabou = false)
+            writeln("O bot tentou chutar e errou"),NovoBot = Bot1.put([cont:0]),Acabou = false)
         ;
-        verificaCount(Bot1.cont,Aux),
+
+	verificaCount(Bot1.cont,Aux),
         getPalpiteLugarBot(Bot1,PalpiteLugar),
         getPalpiteArmaBot(Bot1,PalpiteArma),
         getPalpitePessoaBot(Bot1,PalpitePessoa),
@@ -205,7 +204,7 @@ vezDoBot(Nome,Pessoa,Bot1,Bot2,Resposta,NovoBot,Acabou) :-
                 Checkagem =:= 0 -> writeln("Voce nao possui nenhuma carta."),
                 write("O "),write(Nome),writeln(" jogou."),
                 (Bot1.cont =:= 0 -> NovoBot = Bot1.put([cont:2,prioridades:[PalpiteLugar,PalpiteArma,PalpitePessoa]]),Acabou = false;
-                NovoBot = Bot1.put([cont:3]),Acabou = false
+                NovoBot = Bot1.put([cont:3,prioridades:[PalpiteLugar,PalpiteArma,PalpitePessoa]]),Acabou = false
                 )
             ;
                 jogadorResponde(Intercessao,Desejado),
@@ -216,48 +215,88 @@ vezDoBot(Nome,Pessoa,Bot1,Bot2,Resposta,NovoBot,Acabou) :-
             )
         ;
             verificaCartas([PalpitePessoa, PalpiteLugar, PalpiteArma], Bot2.cartas, Intercessao),
-            len(Intercessao, Checkagem),
+	    len(Intercessao, Checkagem),
             write("O "),write(Nome),writeln(" jogou."),
             (
                 Checkagem =:= 0 -> 
                 (Bot1.cont =:= 0 -> NovoBot = Bot1.put([cont:1,prioridades:[PalpiteLugar,PalpiteArma,PalpitePessoa]]),Acabou = false;
-                NovoBot = Bot1.put([cont:3]),Acabou = false
+                NovoBot = Bot1.put([cont:3,prioridades:[PalpiteLugar,PalpiteArma,PalpitePessoa]]),Acabou = false
                 )
             ;
                 random(0, Checkagem, F),
                 nth0(F, Intercessao, Desejado),
-                (member(Desejado, Bot2.lugares) -> remove(Desejado,Bot1.lugares,[],NovosLugares),Acabou = false, NovoBot = Bot1.put([lugares:NovosLugares,cont:0]);
-                member(Desejado, Bot2.armas) -> remove(Desejado,Bot1.armas,[],NovasArmas),Acabou = false, NovoBot = Bot1.put([armas:NovasArmas,cont:0]);
+                (member(Desejado, Bot1.lugares) -> remove(Desejado,Bot1.lugares,[],NovosLugares),Acabou = false, NovoBot = Bot1.put([lugares:NovosLugares,cont:0]);
+                member(Desejado, Bot1.armas) ->  remove(Desejado,Bot1.armas,[],NovasArmas),Acabou = false, NovoBot = Bot1.put([armas:NovasArmas,cont:0]);
                 remove(Desejado, Bot1.pessoas,[], NovasPessoas),Acabou = false, NovoBot = Bot1.put([pessoas:NovasPessoas,cont:0]))
             )
         )
     ).
+
+escreveResposta(Resposta) :-
+    write(Resposta.pessoa),write(" matou com um(a) "),write(Resposta.arma),
+    write(" no(a) "),writeln(Resposta.lugar).
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"0") :-
     mostraMenu(Pessoa),
     read_line(Opcao),
     start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao).
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,"1") :-   
+start(Pessoa,Bot1,Bot2,Resposta,Dados,"1") :-	
     vezDoJogador(Pessoa,Bot1,Dados,NovaPessoa),nl,
     vezDoBot("Bot1",Pessoa,Bot1,Bot2,Resposta,NovoBot1,Acabou1),nl,
-    vezDoBot("Bot2",Pessoa,Bot2,Bot1,Resposta,NovoBot2,Acabou2),nl,
-    start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0").
+    (
+        Acabou1 -> writeln("O BOT1 VENCEU O JOGO!"),
+        escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+    ;
+        vezDoBot("Bot2",Pessoa,Bot2,Bot1,Resposta,NovoBot2,Acabou2),nl,
+        (
+	    
+            Acabou2 -> writeln("O BOT2 VENCEU O JOGO!"),
+            escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+        ;
+            start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
+        )
+        
+    ).
 
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"2") :-
     vezDoJogador(Pessoa,Bot2,Dados,NovaPessoa),nl,
     vezDoBot("Bot1",Pessoa, Bot1, Bot2,Resposta, NovoBot1,Acabou1),nl,
-    vezDoBot("Bot2",Pessoa, Bot2, Bot1,Resposta, NovoBot2,Acabou2),nl,
-    start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0").
+    (
+        Acabou1 -> writeln("O BOT1 VENCEU O JOGO!"),
+        escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+    ;
+        vezDoBot("Bot2",Pessoa,Bot2,Bot1,Resposta,NovoBot2,Acabou2),nl,
+        (
+            Acabou2 -> writeln("O BOT 2 VENCEU O JOGO!"),
+            escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+        ;
+            start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
+        )
+        
+    ).
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"3") :-
     realizaPalpite(Resposta,Dados,Retorno),nl,
-    (Retorno -> start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+    (
+        Retorno -> write("PARABENS, VOCE VENCEU O JOGO!, "),
+	escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
     ;
-    vezDoBot("Bot1",Pessoa, Bot1, Bot2,Resposta, NovoBot1,Acabou1),nl,
-    vezDoBot("Bot2",Pessoa, Bot2, Bot1,Resposta, NovoBot2,Acabou2),nl,
-    start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
+        vezDoBot("Bot1",Pessoa, Bot1, Bot2,Resposta, NovoBot1,Acabou1),nl,
+        (
+            Acabou1 -> writeln("O BOT1 VENCEU O JOGO!"),
+            escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+        ;
+            vezDoBot("Bot2",Pessoa,Bot2,Bot1,Resposta,NovoBot2,Acabou2),nl,
+            (
+                Acabou2 -> writeln("O BOT2 VENCEU O JOGO!"),
+                escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
+            ;
+                start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
+            )
+            
+        )
     ).
 
 start(Pessoa,Bot1,Bot2,Resposta,Dados,"4") :-
