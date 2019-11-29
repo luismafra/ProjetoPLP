@@ -16,7 +16,7 @@ len([_|Y], R):-
 
 read_line(String) :-
     current_input(Input),
-    read_string(Input, "\n", "\r", End, String).
+    read_string(Input, "\n", "\r", _End, String).
 
 ajeitaPalavra(Palavra,Retorno) :-
     string_lower(Palavra, X),firstCharUppercase(X,Retorno).
@@ -31,21 +31,21 @@ getPalpiteLugar(Lugares,PalpiteLugar) :-
     write("Digite o lugar: "),
     read_line(Palpite),
     ajeitaPalavra(Palpite,X),
-    (member(X,Lugares) -> PalpiteLugar = X; writeln("Lugar inserido é invalido"),
+    (member(X,Lugares) -> PalpiteLugar = X; writeln("Lugar inserido eh invalido"),
     getPalpiteLugar(Lugares,PalpiteLugar)).
 
 getPalpiteArma(Armas,PalpiteArma) :-
     write("Digite a arma: "),
     read_line(Palpite),
     ajeitaPalavra(Palpite,X),
-    (member(X,Armas) -> PalpiteArma = X; writeln("Arma inserida é invalida"),
+    (member(X,Armas) -> PalpiteArma = X; writeln("Arma inserida eh invalida"),
     getPalpiteArma(Armas,PalpiteArma)).
 
 getPalpitePessoa(Pessoas,PalpitePessoa) :-
     write("Digite a pessoa: "),
     read_line(Palpite),
     ajeitaPalavra(Palpite,X),
-    (member(X,Pessoas) -> PalpitePessoa = X; writeln("Pessoa inserida é invalida"),
+    (member(X,Pessoas) -> PalpitePessoa = X; writeln("Pessoa inserida eh invalida"),
     getPalpitePessoa(Pessoas,PalpitePessoa)).
 
 criaResposta(R, Resposta) :-
@@ -136,7 +136,7 @@ vezDoJogador(Pessoa,Bot,Dados,NovaPessoa) :-
     getPalpitePessoa(Dados.pessoas,PalpitePessoa),
     verificaCartas([PalpiteLugar,PalpiteArma,PalpitePessoa],Bot.cartas,BotPossui),
     len(BotPossui,R),
-    (R =:= 0 -> writeln("O bot nao possui nenhuma das 3 cartas"),NovaPessoa = Pessoa;
+    (R =:= 0 -> writeln("O bot nao possui nenhuma das 3 cartas."),NovaPessoa = Pessoa;
     random(0,R,X),
     nth0(X, BotPossui, Carta),
     write("O bot tinha "),writeln(Carta),
@@ -169,11 +169,11 @@ getPalpitePessoaBot(Bot,PalpitePessoa) :-
     nth0(B, Bot.pessoas, PalpitePessoa).
 
 jogadorResponde(Possiveis,Retorno) :-
-    writeln("Você possui: "),writeln(Possiveis),
+    writeln("Voce possui: "),writeln(Possiveis),
     write("Qual voce deseja que o bot saiba? "),
     read_line(X),ajeitaPalavra(X,Resposta),
     (member(Resposta,Possiveis) -> Retorno = Resposta;
-    writeln("Essa nao é uma das opcoes"),jogadorResponde(Possiveis,Retorno)
+    writeln("Essa nao e uma das opcoes."),jogadorResponde(Possiveis,Retorno)
     ).
 
 
@@ -293,7 +293,7 @@ start(Pessoa,Bot1,Bot2,Resposta,Dados,"3") :-
                 Acabou2 -> writeln("O BOT2 VENCEU O JOGO!"),
                 escreveResposta(Resposta),start(Pessoa,Bot1,Bot2,Resposta,Dados,"5")
             ;
-                start(NovaPessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
+                start(Pessoa,NovoBot1,NovoBot2,Resposta,Dados,"0")
             )
             
         )
@@ -306,7 +306,7 @@ start(Pessoa,Bot1,Bot2,Resposta,Dados,"4") :-
 start(_,_,_,_,_,"5") :-
     writeln("FIM DE JOGO").
 
-start(Pessoa,Bot1,Bot2,Resposta,Dados,Opcao) :-
+start(Pessoa,Bot1,Bot2,Resposta,Dados,_Opcao) :-
     writeln("Opcao invalida"),
     start(Pessoa,Bot1,Bot2,Resposta,Dados,"0").
 
@@ -322,6 +322,6 @@ main :-
 
     sorteiaCartas(8,Baralho,Dados,[],NovoBaralho,Pessoa),
     sorteiaCartas(8,NovoBaralho,Dados,[],OutroBaralho,Bot1),
-    sorteiaCartas(8,OutroBaralho,Dados,[],BaralhoVazio,Bot2),
+    sorteiaCartas(8,OutroBaralho,Dados,[],[],Bot2),
     
-    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0").    
+    start(Pessoa,Bot1,Bot2,Resposta,Dados,"0").  
