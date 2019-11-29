@@ -62,7 +62,8 @@ criaBaralho(Resposta, Dados, Baralho):-
     remove(Resposta.arma, Dados.armas, [], Armas),
     remove(Resposta.pessoa, Dados.pessoas, [], Pessoas),
     append(Lugares, Armas, Aux),
-    append(Aux, Pessoas, Baralho).
+    append(Aux, Pessoas, Aux2),
+    random_permutation(Aux2,Baralho).
 
 sorteiaCartas(0,Baralho,Dados,Cartas,NovoBaralho,Pessoa) :-
     Pessoa = r{lugares:Dados.lugares,armas:Dados.armas,pessoas:Dados.pessoas,prioridades:["","",""],cartas:Cartas,cont:0},
@@ -319,7 +320,6 @@ main :-
 
     criaResposta(Dados,Resposta),
     criaBaralho(Resposta,Dados,Baralho),
-
     sorteiaCartas(8,Baralho,Dados,[],NovoBaralho,Pessoa),
     sorteiaCartas(8,NovoBaralho,Dados,[],OutroBaralho,Bot1),
     sorteiaCartas(8,OutroBaralho,Dados,[],[],Bot2),
